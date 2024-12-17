@@ -16,7 +16,7 @@ class Project(models.Model):
 
 class ProjectImage(models.Model):
     project = models.ForeignKey(Project, on_delete=models.CASCADE, related_name="images")
-    image = models.ImageField(upload_to="project_images/")
+    image = models.ImageField(upload_to="files/project_images/")
     uploaded_at = models.DateTimeField(auto_now_add=True)
     label = models.CharField(max_length=500)
     Note = models.TextField()

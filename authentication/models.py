@@ -12,7 +12,7 @@ class User(AbstractBaseUser, PermissionsMixin):
         ('Creative', 'Creative'),
     )
     id = models.UUIDField(primary_key=True, default=uuid.uuid4, editable=False)
-    fullname = models.CharField(max_length=250,blank=True, null=True)
+    # fullname = models.CharField(max_length=250,blank=True, null=True)
     email = models.EmailField(verbose_name='email address',max_length=255,unique=True,)
     is_active = models.BooleanField(default=False)
     is_admin = models.BooleanField(default=False)
@@ -20,7 +20,7 @@ class User(AbstractBaseUser, PermissionsMixin):
     objects = UserManager()
 
     USERNAME_FIELD = 'email'
-    REQUIRED_FIELDS = ['fullname']
+    REQUIRED_FIELDS = []
 
     def __str__(self):
         return self.email

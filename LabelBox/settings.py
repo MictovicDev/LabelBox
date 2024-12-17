@@ -33,9 +33,9 @@ print(BASE_DIR)
 SECRET_KEY = os.getenv('SECRET_KEY')
 
 # SECURITY WARNING: don't run with debug turned on in production!
-DEBUG = True
+DEBUG = False
 
-ALLOWED_HOSTS = []
+ALLOWED_HOSTS = ['*']
 
 AUTH_USER_MODEL = "authentication.User"
 
@@ -51,6 +51,7 @@ INSTALLED_APPS = [
     'django.contrib.staticfiles',
     'annotation',
     'authentication.apps.AuthenticationConfig',
+    'cloudinary_storage',
     'cloudinary'
 
 ]
@@ -133,8 +134,12 @@ USE_TZ = True
 
 
 STATIC_URL = 'static/'
-STATICFILES_STORAGE = 'whitenoise.storage.CompressedManifestStaticFilesStorage'
+STATICFILES_STORAGE = 'cloudinary_storage.storage.StaticHashedCloudinaryStorage'
 STATIC_ROOT = os.path.join(BASE_DIR, 'staticfiles')
+
+MEDIA_ROOT = os.path.join(BASE_DIR, 'media')
+MEDIA_URL = '/media/'
+DEFAULT_FILE_STORAGE = 'cloudinary_storage.storage.MediaCloudinaryStorage'
 
 
 
@@ -148,9 +153,16 @@ STATICFILES_DIRS = [
 DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
 
 ##CLOUDINARY CONFIGURATION
-cloudinary.config(
-    cloud_name = os.getenv('CLOUD_NAME'),
-    api_key = os.getenv('API_KEY'),
-    api_secret = os.getenv('API_SECRET')
 
+
+MEDIA_URL = 'media/'
+MEDIA_ROOT = os.path.join(BASE_DIR, 'media')
+
+
+cloudinary.config(
+     cloud_name = os.getenv('CLOUD_NAME'),
+     api_key = os.getenv('API_KEY'),
+     api_secret = os.getenv('API_SECRET')
 )
+DEFAULT_FILE_STORAGE = 'cloudinary_storage.storage.MediaCloudinaryStorage'
+# 
