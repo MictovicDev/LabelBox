@@ -1,22 +1,30 @@
+{%load static%}
 <!DOCTYPE html>
 <html lang="en">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <script src="https://unpkg.com/htmx.org"></script>
     <title>Database Annotation System</title>
     <link href="https://cdnjs.cloudflare.com/ajax/libs/tailwindcss/2.2.19/tailwind.min.css" rel="stylesheet">
 </head>
 <body class="bg-gray-100">
+    <div id="loading-spinner" class="fixed inset-0 bg-gray-600 bg-opacity-50 flex justify-center items-center hidden">
+        <div class="spinner-border text-white" role="status">
+            <span class="sr-only">Loading...</span>
+        </div>
+    </div>
     <div class="container mx-auto px-4 py-8">
         <!-- Project Creation Section -->
         <div class="max-w-4xl mx-auto mb-8">
             <div class="bg-white rounded-lg shadow p-6">
                 <h2 class="text-2xl font-bold mb-6">Create Annotation Project</h2>
-                <form id="projectForm" class="space-y-4">
+                <form hx-post="{% url 'project' %}" hx-target="#project-item" hx-swap="afterbegin"  id="projectForm" class="space-y-4"  enctype="multipart/form-data" hx-on::after-request="this.reset()">
+                    {%csrf_token%}
                     <div>
                         <label class="block text-gray-700 mb-2">Project Name</label>
                         <input type="text" 
-                               name="projectName" 
+                               name="name" 
                                class="w-full p-2 border rounded focus:ring-2 focus:ring-blue-500"
                                required>
                     </div>
@@ -45,128 +53,35 @@
                 </form>
             </div>
         </div>
-
         <!-- Project List Section -->
-        <div class="max-w-4xl mx-auto mb-8">
+        <div id="project-list" class="max-w-4xl mx-auto mb-8">
+           
             <div class="bg-white rounded-lg shadow p-6">
-                <h2 class="text-2xl font-bold mb-6">Annotation Projects</h2>
-                <div class="space-y-4">
-                    <!-- Project Item -->
-                    <div class="border rounded-lg p-4">
-                        <div class="flex justify-between items-center">
-                            <div>
-                                <h3 class="text-lg font-semibold">Project Name</h3>
-                                <p class="text-gray-600">Project description goes here...</p>
-                                <p class="text-sm text-gray-500">Images: 25 | Completed: 10</p>
-                            </div>
-                            <button onclick="loadAnnotationTask(1)" 
-                                    class="bg-green-600 text-white py-2 px-4 rounded hover:bg-green-700">
-                                Continue Annotation
-                            </button>
-                        </div>
-                    </div>
+                    
+                     <h2 id="projects" class="text-2xl font-bold mb-6">Annotation Projects</h2>
+                    
+                        <div id="project-item" class="space-y-4">
+                            <!-- Project Item -->
+                            {%for project in projects%}
+                                <div class="border rounded-lg p-4">
+                                    <div class="flex justify-between items-center">
+                                        <div>
+                                            <h3 class="text-lg font-semibold">{{project.name}}</h3>
+                                            <p class="text-gray-600">{{project.description}}</p>
+                                            <p class="text-sm text-gray-500">Images: {{project.images.count}} | Completed: 10</p>
+                                        </div>
+                                        <button  hx-push-url="true" hx-get="{% url 'project-detail' project.id %}" hx-target="body" 
+                                                class="bg-green-600 text-white py-2 px-4 rounded hover:bg-green-700">
+                                            Continue Annotation
+                                        </button>
+                                    </div>
+                                </div>
+                         {%endfor%}   
                 </div>
             </div>
         </div>
+        
 
-        <!-- Annotation Task Section -->
-        <div id="annotationTask" class="max-w-4xl mx-auto hidden">
-            <div class="bg-white rounded-lg shadow p-6">
-                <div class="flex justify-between items-center mb-6">
-                    <h2 class="text-2xl font-bold">Image Annotation</h2>
-                    <div class="text-gray-600">Image 11 of 25</div>
-                </div>
-
-                <!-- Image Display -->
-                <div class="mb-6">
-                    <img src="/api/placeholder/800/600" 
-                         alt="Image for annotation" 
-                         class="w-full rounded-lg">
-                </div>
-
-                <!-- Annotation Form -->
-                <form id="annotationForm" class="space-y-4">
-                    <div>
-                        <label class="block text-gray-700 mb-2">Labels</label>
-                        <input type="text" 
-                               name="labels" 
-                               class="w-full p-2 border rounded focus:ring-2 focus:ring-blue-500"
-                               placeholder="Enter labels separated by commas">
-                    </div>
-
-                    <div>
-                        <label class="block text-gray-700 mb-2">Notes</label>
-                        <textarea name="notes" 
-                                  class="w-full p-2 border rounded focus:ring-2 focus:ring-blue-500"
-                                  rows="3"
-                                  placeholder="Add any additional notes..."></textarea>
-                    </div>
-
-                    <div class="flex space-x-4">
-                        <button type="button" 
-                                class="flex-1 bg-gray-200 text-gray-700 py-2 px-4 rounded hover:bg-gray-300">
-                            Skip
-                        </button>
-                        <button type="submit" 
-                                class="flex-1 bg-blue-600 text-white py-2 px-4 rounded hover:bg-blue-700">
-                            Save & Next
-                        </button>
-                    </div>
-                </form>
-            </div>
-        </div>
-    </div>
-
-    <script>
-        // Show annotation task
-        function loadAnnotationTask(projectId) {
-            document.getElementById('annotationTask').classList.remove('hidden');
-            // Here you would fetch the next image from the database
-        }
-
-        // Handle project creation
-        document.getElementById('projectForm').addEventListener('submit', async (e) => {
-            e.preventDefault();
-            const formData = new FormData(e.target);
-            
-            try {
-                const response = await fetch('/api/projects', {
-                    method: 'POST',
-                    body: formData
-                });
-                
-                if (response.ok) {
-                    alert('Project created successfully');
-                    location.reload();
-                }
-            } catch (error) {
-                alert('Error creating project: ' + error.message);
-            }
-        });
-
-        // Handle annotation submission
-        document.getElementById('annotationForm').addEventListener('submit', async (e) => {
-            e.preventDefault();
-            const formData = new FormData(e.target);
-            
-            try {
-                const response = await fetch('/api/annotations', {
-                    method: 'POST',
-                    body: JSON.stringify(Object.fromEntries(formData)),
-                    headers: {
-                        'Content-Type': 'application/json'
-                    }
-                });
-                
-                if (response.ok) {
-                    // Load next image
-                    loadAnnotationTask(currentProjectId);
-                    e.target.reset();
-                }
-            } catch (error) {
-                alert('Error saving annotation: ' + error.message);
-            }
-        });
-    </script>
+ 
 </body>
 </html>

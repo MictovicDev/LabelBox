@@ -33,11 +33,12 @@ print(BASE_DIR)
 SECRET_KEY = os.getenv('SECRET_KEY')
 
 # SECURITY WARNING: don't run with debug turned on in production!
-DEBUG = False
+DEBUG = True
 
 ALLOWED_HOSTS = ['*']
 
 AUTH_USER_MODEL = "authentication.User"
+
 
 
 # Application definition
@@ -52,7 +53,8 @@ INSTALLED_APPS = [
     'annotation',
     'authentication.apps.AuthenticationConfig',
     'cloudinary_storage',
-    'cloudinary'
+    'cloudinary',
+    'django_htmx'
 
 ]
 
@@ -64,6 +66,7 @@ MIDDLEWARE = [
     'django.contrib.auth.middleware.AuthenticationMiddleware',
     'django.contrib.messages.middleware.MessageMiddleware',
     'django.middleware.clickjacking.XFrameOptionsMiddleware',
+    'django_htmx.middleware.HtmxMiddleware'
 ]
 
 ROOT_URLCONF = 'LabelBox.urls'

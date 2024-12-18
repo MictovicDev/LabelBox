@@ -1,0 +1,14 @@
+<div class="border rounded-lg p-4">
+    <div class="flex justify-between items-center">
+        <div>
+            <h3 class="text-lg font-semibold">{{project.name}}</h3>
+            <p class="text-gray-600">{{project.description}}</p>
+            <p class="text-sm text-gray-500">Images: {{project.images.count}} | Completed: 10</p>
+        </div>
+        <button hx-push-url="true" hx-get="{% url 'project-detail' project.id %}" hx-target="body" 
+                class="bg-green-600 text-white py-2 px-4 rounded hover:bg-green-700">
+            Continue Annotation
+        </button>
+    </div>
+</div>
+

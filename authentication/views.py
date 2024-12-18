@@ -3,6 +3,8 @@ from django.urls import reverse
 from .models import User
 from django.contrib.auth import login, authenticate
 from django.contrib import messages
+from annotation.models import Project
+
 
 
 # Create your views here.
@@ -37,4 +39,5 @@ def signup(request):
 
 
 def home(request):
-    return render(request, 'annotate.html')
+    projects = Project.objects.filter(owner=request.user)[0:3]
+    return render(request, 'annotate.html', context={'projects': projects})
