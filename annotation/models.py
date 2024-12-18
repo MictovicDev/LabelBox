@@ -29,18 +29,12 @@ class ProjectImage(models.Model):
     project = models.ForeignKey(Project, on_delete=models.CASCADE, related_name="images")
     image = models.ImageField(upload_to="files/project_images/")
     uploaded_at = models.DateTimeField(auto_now_add=True)
+    label = models.CharField(max_length=500, blank=True, null=True)
+    Note = models.TextField(blank=True, null=True)
     
 
 
     def __str__(self):
-        return f"{self.project.name} Image"
+        return f"{self.image.url} Image"
     
-class AnnotatdImage(models.Model):
-    project = models.ForeignKey(Project, on_delete=models.CASCADE)
-    label = models.CharField(max_length=500)
-    Note = models.TextField()
-
-
-    # def __str__(self):
-    #     retu
 

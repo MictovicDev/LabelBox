@@ -1,5 +1,5 @@
 from django.shortcuts import render, get_object_or_404
-from django.http import JsonResponse
+from django.http import JsonResponse, HttpResponse
 from .models import Project, ProjectImage
 import asyncio
 from asgiref.sync import sync_to_async
@@ -68,10 +68,69 @@ async def create_project(request):
 
 def get_detail(request, pk):
     project = get_object_or_404(Project, pk=pk) 
+    images = project.images.all().order_by('id')
+    image = project.images.all().order_by('id')[0].image.url
+    total_images = images.count()
+    index = 1
+    print(index)
+    context = {'project': project,
+                'image': image,
+                'index': index,
+                'total_images': total_images
+                }
     if request.headers.get('HX-Request'):  
-        return render(request, 'project_detail.html', {'project': project})
-    return render(request, 'project_detail.html', {'project': project})
+        return render(request, 'project_detail.html',context)
+    return render(request, 'project_detail.html',context)
     
     
-    
+def project_view(request, project_id, image_index=0):
+    pass
+   
+    # return render(request, 'project_detail.html', context)
 
+def back(request, pk, index):
+    if request.method == 'POST':
+        project = get_object_or_404(Project, id=pk)
+        images = project.images.filter().order_by('id')
+        try:
+            image = images[index].image.url
+        except Exception as e:
+            image = images[0].image.url
+            index = 0
+            print(e)
+        total_images = images.count()
+        context = {
+            'project': project,
+            'index': index - 1,
+            'image': image,
+            'total_images': total_images,
+        }
+        if request.headers.get('HX-Request'):
+            return render(request, 'project_detail.html', context)
+            
+
+
+def save_and_next(request, pk, index):
+    if request.method == 'POST':
+            print(f"it's me {index}")
+            project = get_object_or_404(Project, id=pk)
+            images = project.images.filter().order_by('id')
+            print(images)
+            try:
+                image = images[index].image.url
+            except Exception as e:
+                image = images[0].image.url
+                index = 0
+                print(e)
+            total_images = images.count()
+            context = {
+                'project': project,
+                'index': index + 1,
+                'image': image,
+                'total_images': total_images,
+            }
+            if request.headers.get('HX-Request'):
+                return render(request, 'project_detail.html', context)
+            
+            
+    
