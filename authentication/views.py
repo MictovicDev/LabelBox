@@ -39,5 +39,5 @@ def signup(request):
 
 
 def home(request):
-    projects = Project.objects.filter(owner=request.user)[0:3]
+    projects = Project.objects.filter(owner=request.user).filter(completed=False)[0:3]
     return render(request, 'annotate.html', context={'projects': projects})

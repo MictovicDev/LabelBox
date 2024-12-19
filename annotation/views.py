@@ -1,4 +1,4 @@
-from django.shortcuts import render, get_object_or_404
+from django.shortcuts import render, get_object_or_404, redirect
 from django.http import JsonResponse, HttpResponse
 from .models import Project, ProjectImage
 import asyncio
@@ -33,6 +33,7 @@ async def save_uploaded_file(project, file):
             'filename': file.name,
             'error': str(e),
         }
+    
         
 async def create_project(request):
     if request.method != 'POST':
@@ -68,25 +69,26 @@ async def create_project(request):
 
 def get_detail(request, pk):
     project = get_object_or_404(Project, pk=pk) 
-    images = project.images.all().order_by('id')
-    image = project.images.all().order_by('id')[0].image.url
-    total_images = images.count()
-    index = 1
-    print(index)
-    context = {'project': project,
-                'image': image,
-                'index': index,
-                'total_images': total_images
-                }
-    if request.headers.get('HX-Request'):  
+    images = project.images.filter(tagged=False).order_by('id')
+    try:
+        image = project.images.filter(tagged=False).order_by('id')[0].image.url
+        print(image)
+        total_images = images.count()
+        index = 0
+        print(index)
+        context = {'project': project,
+                    'image': image,
+                    'index': index,
+                    'total_images': total_images
+                    }
+        if request.headers.get('HX-Request'):  
+            return render(request, 'project_detail.html',context)
         return render(request, 'project_detail.html',context)
-    return render(request, 'project_detail.html',context)
+    except Exception as e:
+        print('index out of range')
+        return redirect('complete.html')
+        
     
-    
-def project_view(request, project_id, image_index=0):
-    pass
-   
-    # return render(request, 'project_detail.html', context)
 
 def back(request, pk, index):
     if request.method == 'POST':
@@ -112,21 +114,31 @@ def back(request, pk, index):
 
 def save_and_next(request, pk, index):
     if request.method == 'POST':
-            print(f"it's me {index}")
+            label = request.POST.get('label')
+            description = request.POST.get('description')
             project = get_object_or_404(Project, id=pk)
-            images = project.images.filter().order_by('id')
-            print(images)
+            images = project.images.filter(tagged=False).order_by('id')
+            count = images.count()
             try:
-                image = images[index].image.url
+                image = images[index]
+                image.label = label
+                image.note = description
+                image.tagged = True
+                image.save()
+                image_url = images[index].image.url
+                messages.add_message(request, messages.SUCCESS, 'Image Annotated')
             except Exception as e:
-                image = images[0].image.url
-                index = 0
+                if count == index:
+                    project.completed = True
+                    project.save()
+                    return render(request, 'complete.html')
+                # image_url = images[0].image.url
                 print(e)
             total_images = images.count()
             context = {
                 'project': project,
                 'index': index + 1,
-                'image': image,
+                'image': image_url,
                 'total_images': total_images,
             }
             if request.headers.get('HX-Request'):

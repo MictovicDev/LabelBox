@@ -31,6 +31,7 @@ class ProjectImage(models.Model):
     uploaded_at = models.DateTimeField(auto_now_add=True)
     label = models.CharField(max_length=500, blank=True, null=True)
     Note = models.TextField(blank=True, null=True)
+    tagged = models.BooleanField(default=False)
     
 
 
