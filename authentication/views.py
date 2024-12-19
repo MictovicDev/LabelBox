@@ -43,4 +43,4 @@ def home(request):
         projects = Project.objects.filter(owner=request.user).filter(completed=False)[0:3]
         return render(request, 'annotate.html', context={'projects': projects})
     else:
-        return redirect('signup.html')
+        return redirect('signup')
