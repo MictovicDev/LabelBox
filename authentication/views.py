@@ -1,4 +1,4 @@
-from django.shortcuts import render, HttpResponse
+from django.shortcuts import render, HttpResponse, redirect
 from django.urls import reverse
 from .models import User
 from django.contrib.auth import login, authenticate
@@ -39,5 +39,8 @@ def signup(request):
 
 
 def home(request):
-    projects = Project.objects.filter(owner=request.user).filter(completed=False)[0:3]
-    return render(request, 'annotate.html', context={'projects': projects})
+    if request.user.is_authenticated:
+        projects = Project.objects.filter(owner=request.user).filter(completed=False)[0:3]
+        return render(request, 'annotate.html', context={'projects': projects})
+    else:
+        return redirect('signup.html')
